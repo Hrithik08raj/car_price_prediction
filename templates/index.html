@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    
+    <!-- Blurred Background Image -->
+    <div class="absolute inset-0 z-[-1]">
+        <img src="/static/car_img.jpg" alt="background" class="w-full h-full object-cover filter blur-md brightness-50 scale-105" />
+    </div>
+
+    <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden relative z-10">
+        
+        <!-- Left Panel: Info / Banner -->
+        <div class="md:w-5/12 bg-secondary p-10 text-white flex flex-col justify-center relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <i class="fas fa-car-side text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-4 leading-tight">AI Car Price<br/>Estimator</h1>
+                <p class="text-slate-300 mb-8">Get highly accurate resale value predictions powered by advanced machine learning.</p>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-check-circle text-blue-400"></i>
+                        <span class="text-sm font-medium">Data-driven accuracy</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-bolt text-blue-400"></i>
+                        <span class="text-sm font-medium">Real-time inference</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-database text-blue-400"></i>
+                        <span class="text-sm font-medium">Trained on thousands of listings</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Abstract background shapes -->
+            <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+            <div class="absolute -top-24 -left-24 w-64 h-64 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+        </div>
+
+        <!-- Right Panel: Form -->
+        <div class="md:w-7/12 p-8 md:p-10">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Vehicle Details</h2>
+            <p class="text-slate-500 mb-8 text-sm">Enter the specifications of your car below to get an instant valuation.</p>
+            
+            <form id="prediction-form" class="space-y-5">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Company -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Make / Company</label>
+                        <select id="company" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-slate-50 text-slate-700 cursor-pointer appearance-none" required>
+                            <option value="" disabled selected>Select Company</option>
+                            {% for company in companies %}
+                                <option value="{{ company }}">{{ company }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Car Name / Model -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Car Model</label>
+                        <select id="name" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-slate-50 text-slate-700 cursor-pointer appearance-none" required>
+                            <option value="" disabled selected>Select Model</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Year -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Year of Manufacture</label>
+                        <select id="year" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-slate-50 text-slate-700 cursor-pointer appearance-none" required>
+                            <option value="" disabled selected>Select Year</option>
+                            <!-- Script will populate years -->
+                        </select>
+                    </div>
+                    
+                    <!-- Fuel Type -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Fuel Type</label>
+                        <select id="fuel_type" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-slate-50 text-slate-700 cursor-pointer appearance-none" required>
+                            <option value="" disabled selected>Select Fuel</option>
+                            {% for fuel in fuel_types %}
+                                <option value="{{ fuel }}">{{ fuel }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Kms Driven -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Kilometers Driven</label>
+                    <div class="relative">
+                        <input type="number" id="kms_driven" min="0" step="500" placeholder="e.g. 45000" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-slate-50 text-slate-700" required>
+                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400 font-medium text-sm">
+                            KM
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mt-2">
+                    <i class="fas fa-magic"></i>
+                    <span id="btn-text">Predict Price</span>
+                </button>
+            </form>
+
+            <!-- Result Card -->
+            <div id="result-card" class="hidden mt-6 p-6 rounded-xl border-2 border-green-100 bg-green-50/50">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl shadow-sm">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-green-700 uppercase tracking-wide">Estimated Value</p>
+                        <div class="flex items-baseline gap-1 mt-0.5">
+                            <span class="text-3xl font-extrabold text-slate-800 tracking-tight" id="predicted-price">₹0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error Card -->
+            <div id="error-card" class="hidden mt-6 p-4 rounded-xl border-2 border-red-100 bg-red-50 text-red-600 text-sm font-medium flex items-center gap-3">
+                <i class="fas fa-exclamation-circle text-lg"></i>
+                <span id="error-message">An error occurred.</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Pass jinja data to JS -->
+    <script>
+        const allModels = {{ car_models | tojson }};
+        const companySelect = document.getElementById('company');
+        const modelSelect = document.getElementById('name');
+        const yearSelect = document.getElementById('year');
+
+        // Populate Years (e.g., from 1995 to current year)
+        const currentYear = new Date().getFullYear();
+        for(let y = currentYear; y >= 1995; y--) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            yearSelect.appendChild(opt);
+        }
+
+        // Filter models based on selected company
+        companySelect.addEventListener('change', function() {
+            const selectedCompany = this.value;
+            modelSelect.innerHTML = '<option value="" disabled selected>Select Model</option>';
+            
+            const filteredModels = allModels.filter(model => model.toLowerCase().startsWith(selectedCompany.toLowerCase()));
+            
+            filteredModels.forEach(model => {
+                const opt = document.createElement('option');
+                opt.value = model;
+                opt.textContent = model;
+                modelSelect.appendChild(opt);
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('prediction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const icon = btn.querySelector('i');
+            
+            const resultCard = document.getElementById('result-card');
+            const errorCard = document.getElementById('error-card');
+            
+            // UI Loading state
+            btn.disabled = true;
+            btnText.textContent = 'Calculating...';
+            icon.className = 'fas fa-spinner fa-spin';
+            resultCard.classList.add('hidden');
+            errorCard.classList.add('hidden');
+
+            const payload = {
+                company: document.getElementById('company').value,
+                name: document.getElementById('name').value,
+                year: parseInt(document.getElementById('year').value),
+                kms_driven: parseInt(document.getElementById('kms_driven').value),
+                fuel_type: document.getElementById('fuel_type').value
+            };
+
+            try {
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    const formatter = new Intl.NumberFormat('en-IN', {
+                        style: 'currency',
+                        currency: 'INR',
+                        maximumFractionDigits: 0
+                    });
+                    document.getElementById('predicted-price').textContent = formatter.format(data.prediction);
+                    resultCard.classList.remove('hidden');
+                } else {
+                    document.getElementById('error-message').textContent = data.error;
+                    errorCard.classList.remove('hidden');
+                }
+            } catch (err) {
+                document.getElementById('error-message').textContent = 'Network error. Could not reach the server.';
+                errorCard.classList.remove('hidden');
+            } finally {
+                // Restore button
+                btn.disabled = false;
+                btnText.textContent = 'Predict Price';
+                icon.className = 'fas fa-magic';
+            }
+        });
+    </script>
+</body>
+</html>
